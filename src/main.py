@@ -19,17 +19,19 @@ def convert_image(img):
 
 def main():
     name_image = cv2.imread("name.png")
-    method = cv2.TM_SQDIFF_NORMED
+    method = cv2.TM_SQDIFF
     input_path = input("Enter the path of the video to edit:")
 
     input_video = VideoFileClip(input_path)
 
     for frame in input_video.iter_frames():
-        
-        #image = convert_image(frame)
-        w, h = 1920, 1080
+        w, h = 133, 50
+        start_x, start_y = 1530, 40
+        image = frame[start_y:start_y+h, start_x:start_x+w]
+        frame_copy = frame
+
         # Apply template Matching
-        res = cv2.matchTemplate(frame, name_image, method)
+        res = cv2.matchTemplate(image, name_image, method)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
         if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
@@ -37,15 +39,18 @@ def main():
         else:
             top_left = max_loc
 
-        bottom_right = (top_left[0] + w, top_left[1] + h)
-        cv2.rectangle(frame, top_left, bottom_right, 255, 2)
+        bottom_right = (top_left[0] + w + start_x, top_left[1] + h + start_y)
+        # cv2.rectangle(frame_copy, (top_left[0] + 1528, top_left[1] + 65), bottom_right, 255, 2)
+        cv2.rectangle(frame_copy, (start_x, start_y), (start_x + w, start_y + h), 255, 2)
 
-        if max_val >= 0.5:
-            plt.subplot(121), plt.imshow(res, cmap='gray')
+        if min_val > 0.5:
+            plt.subplot(131), plt.imshow(image, cmap='gray')
+            plt.title("Scanned Image"), plt.xticks([]), plt.yticks([])
+            plt.subplot(132), plt.imshow(frame_copy, cmap='gray')
             plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-            plt.subplot(122), plt.imshow(frame, cmap='gray')
+            plt.subplot(133), plt.imshow(frame_copy, cmap='gray')
             plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-            plt.suptitle("sqdiff_norm")
+            plt.suptitle("cv2.TM_SQDIFF")
             plt.show()
 
     print("Done.")
