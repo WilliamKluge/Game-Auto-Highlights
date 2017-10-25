@@ -41,15 +41,15 @@ def main():
 
         bottom_right = (top_left[0] + w + start_x, top_left[1] + h + start_y)
         # cv2.rectangle(frame_copy, (top_left[0] + 1528, top_left[1] + 65), bottom_right, 255, 2)
-        cv2.rectangle(frame_copy, (start_x, start_y), (start_x + w, start_y + h), 255, 2)
+        cv2.rectangle(frame_copy, (start_x, start_y), (start_x + w, start_y + h), 255, 5)
 
         if min_val > 0.5:
             plt.subplot(131), plt.imshow(image, cmap='gray')
-            plt.title("Scanned Image"), plt.xticks([]), plt.yticks([])
-            plt.subplot(132), plt.imshow(frame_copy, cmap='gray')
+            plt.title("Scanned Image Area"), plt.xticks([]), plt.yticks([])
+            plt.subplot(132), plt.imshow(res, cmap='gray')
             plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
             plt.subplot(133), plt.imshow(frame_copy, cmap='gray')
-            plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+            plt.title('Detected Point in Image'), plt.xticks([]), plt.yticks([])
             plt.suptitle("cv2.TM_SQDIFF")
             plt.show()
 
