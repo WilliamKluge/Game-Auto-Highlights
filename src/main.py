@@ -6,6 +6,8 @@ import numpy
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from matplotlib import pyplot as plt
 
+from src.grip import GripPipeline
+
 
 def convert_image(img):
     # img[:, :, 0] = numpy.ones([1080, 1920]) * 255
@@ -18,42 +20,18 @@ def convert_image(img):
 
 
 def main():
-    name_image = cv2.imread("name.png")
-    method = cv2.TM_SQDIFF
+    pipline = GripPipeline
     input_path = input("Enter the path of the video to edit: ")
 
     input_video = VideoFileClip(input_path)
 
     for frame in input_video.iter_frames():
-        w, h = 67, 15
-        start_x, start_y = 1543, 54
-        image = frame[start_y:start_y+h, start_x:start_x+w]
-        frame_copy = frame
 
-        # Apply template Matching
-        res = cv2.matchTemplate(cv2.mat(image), name_image, method)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
-        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
-            top_left = min_loc
-        else:
-            top_left = max_loc
+        pipline.process(frame)
 
-        bottom_right = (top_left[0] + w + start_x, top_left[1] + h + start_y)
-        # cv2.rectangle(frame_copy, (top_left[0] + 1528, top_left[1] + 65), bottom_right, 255, 2)
-        cv2.rectangle(frame_copy, (start_x, start_y), (start_x + w, start_y + h), 255, 1)
+        if pipline.find_contours_output:
+            # If the array is not none
 
-        if min_val > 0.5:
-            plt.subplot(141), plt.imshow(name_image, cmap='gray')
-            plt.title("Template"), plt.xticks([]), plt.yticks([])
-            plt.subplot(142), plt.imshow(image, cmap='gray')
-            plt.title("Scanned Area"), plt.xticks([]), plt.yticks([])
-            plt.subplot(143), plt.imshow(res, cmap='gray')
-            plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-            plt.subplot(144), plt.imshow(frame_copy, cmap='gray')
-            plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-            plt.suptitle("cv2.TM_SQDIFF")
-            plt.show()
 
     print("Done.")
 
