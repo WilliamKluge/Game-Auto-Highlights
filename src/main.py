@@ -21,24 +21,29 @@ def print_stats(fps, frame_count):
 
 
 def main():
+    # Image that holds the user's name
     name_image = cv2.imread("name.png")
+    # Create the GRIP Pipeline for image processing
     pipline = GripPipeline(name_image)
+    # Get the path of the video to edit
     input_path = input("Enter the path of the video to edit: ")
     input_path = input_path.replace("\"", "")  # Removes the "" around the path so that file paths can be copied as path
-
+    # Read the path into memory as a video clip
     input_video = VideoFileClip(input_path)
-
+    # Time this process started
     start = time.time()
+    # Amount of frames processed
     processed_frames = 0
     # Amount of frames in the video
     frame_count = int(input_video.fps * input_video.duration)
 
     for frame in input_video.iter_frames():
+        # Iterates through the frames in a clip
 
-        pipline.process(frame)
+        pipline.process(frame)  # Processes the frame using the GRIP filter
 
         if len(pipline.find_contours_output) > 0:
-            # If the array is not none (there are contours)
+            # If the array is not none (there are contours), show the associated images
             plt.subplot(121), plt.imshow(frame, cmap='gray')
             plt.title("Scanned Image"), plt.xticks([]), plt.yticks([])
             plt.subplot(122), plt.imshow(pipline.rgb_threshold_output, cmap='gray')
@@ -46,6 +51,7 @@ def main():
             plt.suptitle("Frame Analysis")
             plt.show()
 
+        # Prints out stats
         processed_frames += 1
         print("Processed frame #" + str(processed_frames))
         if processed_frames % 10 == 0:
