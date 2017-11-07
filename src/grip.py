@@ -19,9 +19,12 @@ class GripPipeline:
         self.mask_output = None
 
         self.__rgb_threshold_input = self.mask_output
-        self.__rgb_threshold_red = [61.915467625899275, 126.23344370860929]
-        self.__rgb_threshold_green = [176.57374100719426, 255.0]
-        self.__rgb_threshold_blue = [231.60971223021582, 255.0]
+        # self.__rgb_threshold_red = [60, 130]
+        # self.__rgb_threshold_green = [170, 255.0]
+        # self.__rgb_threshold_blue = [225, 255.0]
+        self.__rgb_threshold_red = [50, 255]
+        self.__rgb_threshold_green = [50, 255.0]
+        self.__rgb_threshold_blue = [50, 255.0]
 
         self.rgb_threshold_output = None
 
@@ -101,11 +104,6 @@ class GripPipeline:
         Return:
             A list of numpy.ndarray where each one represents a contour.
         """
-
-        for i in input_data:
-            for num in i:
-                if num != 0:
-                    print("found non-zero value")
 
         if (external_only):
             mode = cv2.RETR_EXTERNAL
