@@ -25,8 +25,12 @@ def print_stats(fps, frame_count):
 def main():
     # Show every selected frame
     FRAME_BY_FRAME = False
-    # Time (in seconds) to select around each kill
-    CLIP_SURROUND_TIME = 4
+    # Time (in seconds) to select before each kill
+    CLIP_PRE_TIME = 2
+    # Time (in seconds) to select after each kill
+    CLIP_POST_TIME = 4
+    # Time (in seconds) to ignore after the end of each clip
+    CLIP_POST_IGNORE_TIME = 0
     # Image that holds the user's name
     name_image = cv2.imread("name.png")
     # Create the GRIP Pipeline for image processing
@@ -47,16 +51,14 @@ def main():
     # Clips that were found to fit the criteria
     selected_clips = []
 
-    last_clip_end = -1
+    start_process_time = -1
 
     for frame in input_video.iter_frames():
         # Iterates through the frames in a clip
 
-        if processed_frames / video_fps < last_clip_end:
+        if processed_frames / video_fps <= start_process_time:
             processed_frames += 1
             continue
-        else:
-            last_clip_end = -1
 
         pipline.process(frame)  # Processes the frame using the GRIP filter
 
@@ -71,11 +73,14 @@ def main():
                 plt.suptitle("Frame Analysis")
                 plt.show()
 
-            clip_start_time = processed_frames / video_fps - CLIP_SURROUND_TIME
-            clip_end_time = processed_frames / video_fps + CLIP_SURROUND_TIME
+            clip_start_time = processed_frames / video_fps - CLIP_PRE_TIME
+            clip_end_time = processed_frames / video_fps + CLIP_POST_TIME
 
             if clip_start_time < 0:
-                clip_start_time = 1
+                clip_start_time = 0
+
+            if clip_start_time < start_process_time:
+                clip_start_time = start_process_time
 
             if clip_end_time > input_video.duration:
                 # If the end of the clip would be past the end of the video
@@ -84,18 +89,17 @@ def main():
             print("Selected video between", clip_start_time, "and", clip_end_time)
 
             selected_clips.append(input_video.subclip(clip_start_time, clip_end_time))
-            last_clip_end = clip_end_time
+            start_process_time = clip_end_time + CLIP_POST_IGNORE_TIME
 
         # Prints out stats
         processed_frames += 1
-        print("Processed frame #" + str(processed_frames))
-        if processed_frames % 10 == 0:
-            fps = processed_frames / (time.time() - start)
-            print_stats(fps, frame_count)
+        # fps = processed_frames / (time.time() - start)
+        # print_stats(fps, frame_count)
 
     # Writing video file
     final_clip = concatenate_videoclips(selected_clips)
-    final_clip.write_videofile(input_path[:4] + "_highlights.mp4")
+    # Rename the video input_path (without the .mp4 extension) + _highlights.mp4
+    final_clip.write_videofile(input_path[:len(input_path) - 4] + "_highlights.mp4")
 
     print("Done.")
 

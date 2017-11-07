@@ -19,12 +19,9 @@ class GripPipeline:
         self.mask_output = None
 
         self.__rgb_threshold_input = self.mask_output
-        # self.__rgb_threshold_red = [60, 130]
-        # self.__rgb_threshold_green = [170, 255.0]
-        # self.__rgb_threshold_blue = [225, 255.0]
-        self.__rgb_threshold_red = [50, 255]
-        self.__rgb_threshold_green = [50, 255.0]
-        self.__rgb_threshold_blue = [50, 255.0]
+        self.__rgb_threshold_red = [68.79496402877697, 187.45033112582783]
+        self.__rgb_threshold_green = [116.95143884892087, 255.0]
+        self.__rgb_threshold_blue = [185.74640287769785, 255.0]
 
         self.rgb_threshold_output = None
 
