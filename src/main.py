@@ -24,7 +24,7 @@ def main():
 
         pipline.process(frame)
 
-        if pipline.find_contours_output:
+        if len(pipline.find_contours_output) > 0:
             # If the array is not none (there are contours
             plt.subplot(111), plt.imshow(frame, cmap='gray')
             plt.title("Contours found on image"), plt.xticks([]), plt.yticks([])

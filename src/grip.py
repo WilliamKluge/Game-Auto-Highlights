@@ -93,18 +93,24 @@ class GripPipeline:
         return cv2.inRange(out, (red[0], green[0], blue[0]), (red[1], green[1], blue[1]))
 
     @staticmethod
-    def __find_contours(input, external_only):
+    def __find_contours(input_data, external_only):
         """Sets the values of pixels in a binary image to their distance to the nearest black pixel.
         Args:
-            input: A numpy.ndarray.
+            input_data: A numpy.ndarray.
             external_only: A boolean. If true only external contours are found.
         Return:
             A list of numpy.ndarray where each one represents a contour.
         """
+
+        for i in input_data:
+            for num in i:
+                if num != 0:
+                    print("found non-zero value")
+
         if (external_only):
             mode = cv2.RETR_EXTERNAL
         else:
             mode = cv2.RETR_LIST
         method = cv2.CHAIN_APPROX_SIMPLE
-        im2, contours, hierarchy = cv2.findContours(input, mode=mode, method=method)
+        im2, contours, hierarchy = cv2.findContours(input_data, mode=mode, method=method)
         return contours
