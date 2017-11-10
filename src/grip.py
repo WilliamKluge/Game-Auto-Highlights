@@ -25,10 +25,27 @@ class GripPipeline:
 
         self.rgb_threshold_output = None
 
-        self.__find_contours_input = self.rgb_threshold_output
-        self.__find_contours_external_only = False
+        self.__cv_erode_src = self.rgb_threshold_output
+        self.__cv_erode_kernel = None
+        self.__cv_erode_anchor = (-1, -1)
+        self.__cv_erode_iterations = 1
+        self.__cv_erode_bordertype = cv2.BORDER_CONSTANT
+        self.__cv_erode_bordervalue = (-1)
+
+        self.cv_erode_output = None
+
+        self.__find_contours_input = self.cv_erode_output
+        self.find_contours_external_only = False
 
         self.find_contours_output = None
+
+    def adjust_rgb(self, r1, r2, g1, g2, b1, b2):
+        self.__rgb_threshold_red[0] += r1
+        self.__rgb_threshold_red[1] += r2
+        self.__rgb_threshold_red[0] += g1
+        self.__rgb_threshold_red[1] += g2
+        self.__rgb_threshold_red[0] += b1
+        self.__rgb_threshold_red[1] += b2
 
     def process(self, source0):
         """
@@ -44,10 +61,16 @@ class GripPipeline:
         (self.rgb_threshold_output) = self.__rgb_threshold(self.__rgb_threshold_input, self.__rgb_threshold_red,
                                                            self.__rgb_threshold_green, self.__rgb_threshold_blue)
 
+        # Step CV_erode0:
+        self.__cv_erode_src = self.rgb_threshold_output
+        (self.cv_erode_output) = self.__cv_erode(self.__cv_erode_src, self.__cv_erode_kernel, self.__cv_erode_anchor,
+                                                 self.__cv_erode_iterations, self.__cv_erode_bordertype,
+                                                 self.__cv_erode_bordervalue)
+
         # Step Find_Contours0:
-        self.__find_contours_input = self.rgb_threshold_output
-        (self.find_contours_output) = self.__find_contours(self.__find_contours_input,
-                                                           self.__find_contours_external_only)
+        self.__find_contours_input = self.cv_erode_output
+        (self.find_contours_output) = self.find_contours(self.__find_contours_input,
+                                                         self.find_contours_external_only)
 
     @staticmethod
     def __desaturate(src):
@@ -93,7 +116,22 @@ class GripPipeline:
         return cv2.inRange(out, (red[0], green[0], blue[0]), (red[1], green[1], blue[1]))
 
     @staticmethod
-    def __find_contours(input_data, external_only):
+    def __cv_erode(src, kernel, anchor, iterations, border_type, border_value):
+        """Expands area of lower value in an image.
+        Args:
+           src: A numpy.ndarray.
+           kernel: The kernel for erosion. A numpy.ndarray.
+           iterations: the number of times to erode.
+           border_type: Opencv enum that represents a border type.
+           border_value: value to be used for a constant border.
+        Returns:
+            A numpy.ndarray after erosion.
+        """
+        return cv2.erode(src, kernel, anchor, iterations = (int) (iterations +0.5),
+                            borderType = border_type, borderValue = border_value)
+
+    @staticmethod
+    def find_contours(input_data, external_only):
         """Sets the values of pixels in a binary image to their distance to the nearest black pixel.
         Args:
             input_data: A numpy.ndarray.
